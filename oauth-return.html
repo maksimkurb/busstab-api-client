@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <title>Auth callback</title>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.7.0/qs.js"></script>
+    <script>
+        /**
+         * Send result message to main window
+         */
+        function sendTokenToMainWindow() {
+            const hash = window.location.hash;
+            if (hash.length > 1) {
+                const params = Qs.parse(hash.substr(1));
+                if (params.access_token && params.state) {
+                    if (params.state !== localStorage.getItem('state')) {
+                        window.opener.postMessage({ auth: 'fail-state' }, window.location.origin)
+                    } else {
+                        localStorage.setItem('token', params.access_token);
+                        window.opener.postMessage({ auth: 'done' }, window.location.origin)
+                    }
+                }
+            } else {
+                alert("Пустой ответ от сервера");
+                window.close();
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function(){
+            sendTokenToMainWindow();
+        });
+    </script>
+</body>
+</html>

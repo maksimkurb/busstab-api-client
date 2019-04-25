@@ -1,0 +1,19 @@
+body {
+    opacity: 0.2;
+    cursor: wait;
+}
+
+body.loaded {
+    opacity: 1;
+    cursor: default;
+}
+
+body.auth-logged-out .auth-logged-out,
+body.auth-logged-in .auth-logged-in {
+    display: block;
+}
+
+body.auth-logged-out .auth-logged-in,
+body.auth-logged-in .auth-logged-out {
+    display: none;
+}
