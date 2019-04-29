@@ -17,3 +17,9 @@ body.auth-logged-out .auth-logged-in,
 body.auth-logged-in .auth-logged-out {
     display: none;
 }
+
+#auth-frame {
+    width: 100%;
+    height: 250px;
+    border: 0;
+}

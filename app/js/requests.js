@@ -91,6 +91,93 @@ mutation($input: CompanySearchRequestInput!) {
     updatedAt
   }
 }`;
+//-- Company search
+const COMPANY_INFO_REQUEST = `
+mutation($input: CompanyInfoRequestInput!) {
+  companyInfo(input: $input) {
+    id
+    stage
+    payload {
+      company {
+        id
+        activities {
+          name
+          code
+          redaction
+          fnsDate
+          GRN
+        }
+        
+        directorHistory {
+          start
+          end
+          director {
+            job
+            person {
+              lastName
+              firstName
+              patronymic
+            }
+          }
+          
+        }
+        
+        status
+        OGRN
+        INN
+        KPP
+        OKPO
+        name {
+          fullName
+          shortName
+          brandName
+        }
+        registrationDate
+        registrationType
+        registrationAddress
+        registrationAddressKLADR
+        liquidationDate
+        liquidationType
+        authorizedCapital
+        mainActivity
+        directors {
+          person {
+            lastName
+            firstName
+            patronymic
+            birthDate
+            birthPlace
+            gender
+            id
+          }
+          job
+          bad
+        }
+        founderHistory {
+          founder {
+            capitalContribution
+            encumbrance {
+              type
+            }
+            ... on CompanyFounder {
+              company {
+                name {
+                  fullName
+                }
+              }
+            }
+            ... on PersonFounder {
+              person {
+                firstName
+              }
+            }
+          }
+        }
+        
+      }
+    }
+  }
+}`;
 //#endregion
 
 /* ----- Make request logic ----- */
@@ -146,75 +233,4 @@ function makeRequest(query, variables) {
 
     return result;
 }
-function makePassportRequest() {
-    const data = getFormData();
-
-
-    let input;
-
-    let query;
-    switch (data.level) {
-        case "basic":
-            query = PASSPORT_REQUEST_BASIC;
-            input = {
-                basicInput: {
-                    passportNumber: data.passportNumber,
-                    passportSeries: data.passportSeries,
-                }
-            };
-            break;
-        case "complex":
-            query = PASSPORT_REQUEST_COMPLEX;
-            input = {
-                complexInput: {
-                    passportNumber: data.passportNumber,
-                    passportSeries: data.passportSeries,
-
-                    birthDate: data.birthDate,
-                    birthPlace: data.birthPlace,
-                    firstName: data.firstName,
-                    gender: data.gender,
-                    lastName: data.lastName,
-                    passportIssueDate: data.passportIssueDate,
-                    patronymic: data.patronymic,
-                }
-            };
-            break;
-        case "full":
-        default:
-            query = PASSPORT_REQUEST_FULL;
-            input = {
-                fullInput: {
-                    passportNumber: data.passportNumber,
-                    passportSeries: data.passportSeries,
-
-                    birthDate: data.birthDate,
-                    birthPlace: data.birthPlace,
-                    firstName: data.firstName,
-                    gender: data.gender,
-                    lastName: data.lastName,
-                    passportIssueDate: data.passportIssueDate,
-                    patronymic: data.patronymic,
-
-                    passportDivisionCode: data.passportDivisionCode
-                }
-            };
-    }
-
-    makeRequest(query, input);
-}
 //#endregion
-
-jQuery(() => {
-    $('form#passport-request-form #sumbit-request').on('click', makePassportRequest);
-    $('input[name=level]').on('change', function (e) {
-        var container = $(".disp-container");
-        container.removeClass("disp-basic");
-        container.removeClass("disp-complex");
-        container.removeClass("disp-full");
-        var level = e.currentTarget.value;
-
-        container.addClass('disp-'+level);
-
-    });
-});
