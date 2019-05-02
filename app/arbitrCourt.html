@@ -26,23 +26,12 @@
             <div class="row">
                 <div class="col-4">
                     <form id="request-form" class="request-form border rounded p-4">
-                        <h3>Поиск ЮЛ</h3>
+                        <h3>Арбитражный суд</h3>
 
                         <div class="form-group">
-                            <label for="field-OGRN">ОГРН</label>
-                            <input type="text" class="form-control" name="OGRN" id="field-OGRN">
-                        </div>
-                        <div class="form-group">
-                            <label for="field-INN">ИНН</label>
-                            <input type="text" class="form-control" name="INN" id="field-INN">
-                        </div>
-                        <div class="form-group">
-                            <label for="field-KPP">КПП</label>
-                            <input type="text" class="form-control" name="KPP" id="field-KPP">
-                        </div>
-                        <div class="form-group">
-                            <label for="field-companyName">Наименование компании</label>
-                            <input type="text" class="form-control" name="companyName" id="field-companyName">
+                            <label for="field-companyId">ID компании</label>
+                            <input type="text" class="form-control" name="companyId" id="field-companyId">
+                            <small class="form-text text-muted">Можно получить с помощью запроса "Поиск ЮЛ"</small>
                         </div>
 
                         <button type="button" id="sumbit-request" class="btn btn-primary">Выполнить</button>
@@ -64,14 +53,12 @@
     <script>
         function makeCompanySearchRequest() {
             var data = getFormData();
-            var input = {};
-
-            if (data.OGRN) input.OGRN = data.OGRN;
-            if (data.INN) input.INN = data.INN;
-            if (data.KPP) input.KPP = data.KPP;
-            if (data.companyName) input.companyName = data.companyName;
-
-            makeRequest(COMPANY_SEARCH_REQUEST, {input: input});
+            var input = {
+                input: {
+                    companyId: data.companyId,
+                }
+            };
+            makeRequest(ARBITR_REQUEST, input);
         }
 
         jQuery(() => {

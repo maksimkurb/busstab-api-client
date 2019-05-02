@@ -24,19 +24,20 @@
 
         <section id="request" class="mt-2">
             <div class="row">
-                <div class="col-6">
+                <div class="col-4">
                     <form id="request-form" class="request-form border rounded p-4">
-                        <h3>Поиск ЮЛ</h3>
+                        <h3>Карточка ЮЛ</h3>
 
                         <div class="form-group">
                             <label for="field-id">ID компании</label>
                             <input type="text" class="form-control" name="id" id="field-id">
+                            <small class="form-text text-muted">Можно получить с помощью запроса "Поиск ЮЛ"</small>
                         </div>
 
                         <button type="button" id="sumbit-request" class="btn btn-primary">Выполнить</button>
                     </form>
                 </div>
-                <div class="col-6">
+                <div class="col-8">
                     <div id="results" class="border rounded p-4">
                         <pre class="json"></pre>
                     </div>

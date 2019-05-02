@@ -63,7 +63,7 @@ mutation($fullInput: PassportRequestFullInput!) {
 //-- Company search
 const COMPANY_SEARCH_REQUEST = `
 mutation($input: CompanySearchRequestInput!) {
-  companySearch(input: $input) {
+  companySearch(input: $input, options: { timeout: 30 }) {
     id
     user {
       id
@@ -91,7 +91,7 @@ mutation($input: CompanySearchRequestInput!) {
     updatedAt
   }
 }`;
-//-- Company search
+//-- Company info
 const COMPANY_INFO_REQUEST = `
 mutation($input: CompanyInfoRequestInput!) {
   companyInfo(input: $input) {
@@ -178,6 +178,87 @@ mutation($input: CompanyInfoRequestInput!) {
     }
   }
 }`;
+// -- RNP
+const RNP_REQUEST = `
+mutation($input: RnpRequestInput!) {
+  rnp(input: $input) {
+    stage
+    payload {
+      records {
+        INN
+        registryNumber
+        reason
+        agency
+        inclusionDate
+        exclusionDate
+        purchaseNumber
+        contractNumber
+        law
+        url
+      }
+    }
+  }
+}`;
+// -- FSSP
+const FSSP_REQUEST = `
+mutation($input: FsspRequestInput!) {
+  fssp(input: $input, options: {timeout: 30}) {
+    id
+    stage
+    payload {
+      proceedings {
+        companyId
+        companyOGRN
+        companyINN
+        companyName
+        companyAddress
+        number
+        date
+        summaryProcNumber
+        documentType
+        documentDate
+        documentNumber
+        documentObject
+        object
+        amount
+        debt
+        departmentName
+        departmentAddress
+        postIndex
+        regionCode
+        id
+      }
+      summary {
+        active
+        canceled
+        completed
+      }
+      summaryPerYear {
+        year
+        count
+        activeAmount
+        canceledAmount
+        completedAmount
+      }
+    }
+  }
+}`;
+// -- Arbitr
+const ARBITR_REQUEST = `
+mutation($input:ArbitrCourtRequestInput!) {
+  arbitrCourt(input: $input) {
+    id
+    stage
+    payload {
+      availableCasesSummaries {
+        count
+        amount
+        type
+        party
+      }
+    }
+  }
+}`;
 //#endregion
 
 /* ----- Make request logic ----- */
@@ -208,6 +289,8 @@ function makeRequest(query, variables) {
     };
 
     console.log('[START] Request with body: ', body);
+    const el = document.querySelector("#results > pre");
+    el.innerHTML = "Идёт запрос на сервер...";
 
     const result = fetch(GRAPHQL_ENDPOINT, {
         method: 'POST',
@@ -222,13 +305,13 @@ function makeRequest(query, variables) {
     result
         .then((resp) => {
             console.log('[SUCCESS]', resp);
-            const el = document.querySelector("#results > pre");
             el.innerHTML = JSON.stringify(resp, null, 4);
             hljs.highlightBlock(el);
             return resp;
         })
         .catch((err) => {
             console.error('[ERROR]', err);
+            el.innerHTML = "Ошибка запроса, смотрите консоль    ";
         });
 
     return result;
