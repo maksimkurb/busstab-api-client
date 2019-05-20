@@ -65,11 +65,6 @@ const COMPANY_SEARCH_REQUEST = `
 mutation($input: CompanySearchRequestInput!) {
   companySearch(input: $input, options: { timeout: 30 }) {
     id
-    user {
-      id
-      email
-      nickname
-    }
     stage
     payload {
       companies {
