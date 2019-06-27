@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /* ----- Define GraphQL requests ----- */
 //#region GraphQL Requests
@@ -88,6 +88,91 @@ mutation($input: CompanySearchRequestInput!) {
 }`;
 //-- Company info
 const COMPANY_INFO_REQUEST = `
+fragment CompanyInfo on Company {
+  id
+  status
+  OGRN
+  INN
+  KPP
+  OKPO
+  name {
+    fullName
+    shortName
+    brandName
+  }
+  registrationType
+}
+fragment PersonInfo on Person {
+	id
+  lastName
+  firstName
+  patronymic
+  birthDate
+  birthPlace
+  gender
+}
+fragment EncumbraceInfo on Encumbrace {
+	type
+  end
+  documentNumber
+  documentDate
+  GRN
+  pawnbroker {
+    __typename
+    ...on Company {
+      ...CompanyInfo
+    }
+    ... on Person {
+      ...PersonInfo
+    }
+  }
+  notary {
+    ...PersonInfo
+  }
+}
+fragment FounderInfo on IFounder {
+  capitalContribution
+  encumbrance {
+    ...EncumbraceInfo
+  }
+  ... on CompanyFounder {
+    company {
+      ...CompanyInfo
+    }
+  }
+  ... on PersonFounder {
+    person {
+      ...PersonInfo
+    }
+  }
+  ... on ForeignCompanyFounder {
+    fullName
+    INN
+    country
+    regNumber
+    regAuthority
+    GRN
+  }
+  ... on MOFounder {
+    fullName
+    region
+    fnsDate
+    GRN
+    managementCompany {
+      ...CompanyInfo
+    }
+  }
+  ... on PIFFounder {
+    fullName
+    fnsDate
+    GRN
+
+    managementCompany {
+      ...CompanyInfo
+    }
+  }
+}
+
 mutation($input: CompanyInfoRequestInput!) {
   companyInfo(input: $input) {
     id
@@ -103,18 +188,10 @@ mutation($input: CompanyInfoRequestInput!) {
           GRN
         }
         
-        directorHistory {
-          start
-          end
-          director {
-            job
-            person {
-              lastName
-              firstName
-              patronymic
-            }
-          }
-          
+        phones {
+          fax
+          number
+          updated
         }
         
         status
@@ -137,38 +214,34 @@ mutation($input: CompanyInfoRequestInput!) {
         mainActivity
         directors {
           person {
-            lastName
-            firstName
-            patronymic
-            birthDate
-            birthPlace
-            gender
-            id
+            ...PersonInfo
           }
           job
           bad
         }
+      	founders {
+            __typename
+          ...FounderInfo
+        }
         founderHistory {
-          founder {
-            capitalContribution
-            encumbrance {
-              type
-            }
-            ... on CompanyFounder {
-              company {
-                name {
-                  fullName
-                }
-              }
-            }
-            ... on PersonFounder {
-              person {
-                firstName
-              }
-            }
+          start
+          end
+        	founder {
+            __typename
+            ...FounderInfo
           }
         }
-        
+        directorHistory {
+          start
+          end
+          director {
+            person {
+              ...PersonInfo
+            }
+            job
+            bad
+          }
+        }
       }
     }
   }
@@ -265,11 +338,13 @@ const GRAPHQL_ENDPOINT = "https://api.busstab.ru/graphql";
  * Helper function that returns form data
  */
 function getFormData() {
-    const form = document.querySelector('form.request-form');
-    const formData = new FormData(form);
-    var data = {};
-    formData.forEach((value, key) => {data[key] = value});
-    return data;
+  const form = document.querySelector("form.request-form");
+  const formData = new FormData(form);
+  var data = {};
+  formData.forEach((value, key) => {
+    data[key] = value;
+  });
+  return data;
 }
 
 /**
@@ -278,37 +353,36 @@ function getFormData() {
  * @param variables Request variables data
  */
 function makeRequest(query, variables) {
-    const body = {
-        query: query,
-        variables: variables
-    };
+  const body = {
+    query: query,
+    variables: variables
+  };
 
-    console.log('[START] Request with body: ', body);
-    const el = document.querySelector("#results > pre");
-    el.innerHTML = "Идёт запрос на сервер...";
+  console.log("[START] Request with body: ", body);
+  const el = document.querySelector("#results > pre");
+  el.innerHTML = "Идёт запрос на сервер...";
 
-    const result = fetch(GRAPHQL_ENDPOINT, {
-        method: 'POST',
-        body: JSON.stringify(body),
-        headers: {
-            "Authorization": "Bearer " + getAuthToken(),
-            "Content-Type": "application/json",
-        },
+  const result = fetch(GRAPHQL_ENDPOINT, {
+    method: "POST",
+    body: JSON.stringify(body),
+    headers: {
+      Authorization: "Bearer " + getAuthToken(),
+      "Content-Type": "application/json"
+    }
+  }).then(resp => resp.json()); // Parse response JSON
+
+  result
+    .then(resp => {
+      console.log("[SUCCESS]", resp);
+      el.innerHTML = JSON.stringify(resp, null, 4);
+      hljs.highlightBlock(el);
+      return resp;
     })
-        .then(resp => resp.json()); // Parse response JSON
+    .catch(err => {
+      console.error("[ERROR]", err);
+      el.innerHTML = "Ошибка запроса, смотрите консоль    ";
+    });
 
-    result
-        .then((resp) => {
-            console.log('[SUCCESS]', resp);
-            el.innerHTML = JSON.stringify(resp, null, 4);
-            hljs.highlightBlock(el);
-            return resp;
-        })
-        .catch((err) => {
-            console.error('[ERROR]', err);
-            el.innerHTML = "Ошибка запроса, смотрите консоль    ";
-        });
-
-    return result;
+  return result;
 }
 //#endregion
